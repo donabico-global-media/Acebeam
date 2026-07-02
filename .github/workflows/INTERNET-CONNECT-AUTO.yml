@@ -9,23 +9,19 @@ on:
 jobs:
   autonomous-ocean-pulse:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Bắt buộc để Workflow có quyền tự viết log vào kho
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-
-      - name: Install dependencies
-        run: pip install requests
-
       - name: Launch system
+        run: python "Internet-Connect-Auto/Internet-Connect-Auto.py"
+      - name: Commit and Push Log
         run: |
-          if [ -f "Internet-Connect-Auto/Internet-Connect-Auto.py" ]; then
-            python "Internet-Connect-Auto/Internet-Connect-Auto.py"
-          else
-            echo "[ERROR] File không tồn tại!"
-            exit 1
-          fi
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add Connection-Log.txt
+          git commit -m "Auto: Update connection log" || echo "No changes to commit"
+          git push
