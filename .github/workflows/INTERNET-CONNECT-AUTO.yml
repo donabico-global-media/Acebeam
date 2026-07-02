@@ -1,13 +1,10 @@
 name: 🌊 INTERNET CONNECT AUTO
 
 on:
-  # Cho phép Ngài chạy thủ công bất cứ lúc nào
   workflow_dispatch:
-  # Tự động chạy mỗi khi Ngài thay đổi code trong thư mục Internet-Connect-Auto/
   push:
     paths:
       - 'Internet-Connect-Auto/**'
-  # Tự động chạy mỗi đầu giờ (hệ thống tự đập 24/7)
   schedule:
     - cron: '0 * * * *'
 
@@ -15,10 +12,12 @@ jobs:
   autonomous-ocean-pulse:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Bắt buộc để bot có quyền commit file log
+      contents: write
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
@@ -32,6 +31,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git pull origin main --rebase
           git add Connection-Log.txt
-          # Kiểm tra xem có thay đổi không mới commit để tránh lỗi workflow
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto: Update connection log at $(date +'%Y-%m-%d %H:%M:%S')" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto: Update log $(date +'%Y-%m-%d %H:%M:%S')" && git push origin main)
