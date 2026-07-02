@@ -18,5 +18,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           directory: "." 
-          # CHÚ Ý: Thay chữ "acebeam-affiliate" bên dưới thành ĐÚNG tên project sếp đặt trên Cloudflare
-          projectName: "acebeam-affiliate" 
+          projectName: "acebeam" # Sửa thành "acebeam" thay vì "acebeam-affiliate"
