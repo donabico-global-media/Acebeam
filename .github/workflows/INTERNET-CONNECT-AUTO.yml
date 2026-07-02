@@ -1,37 +1,28 @@
-name: 🌊 INTERNET CONNECT AUTO
+# -*- coding: utf-8 -*-
+import os
+import requests
+from datetime import datetime
 
-on:
-  # Cho phép Ngài bấm chạy thủ công ngay tức thì từ trình duyệt Chrome
-  workflow_dispatch:
-  # Tự động kích hoạt khi phát hiện thay đổi trong phân vùng này hoặc file index.html
-  push:
-    paths:
-      - 'Internet-Connect-Auto/**'
-      - 'index.html'
+class EHCInternetConnectAuto:
+    def __init__(self):
+        # URL Gateway đích danh của Ngài
+        self.gateway_url = "https://gateway.ai.cloudflare.com/v1/de9a288d3f724ad0e059bdd52c936f4f/default/cache"
+        
+    def launch_ocean_pulse(self):
+        # Gửi một tín hiệu rỗng (Ping) tới Gateway để ghi nhận lượt truy cập
+        payload = {"status": "ping", "timestamp": str(datetime.now())}
+        
+        try:
+            # Không cần Header Authorization nữa
+            response = requests.post(self.gateway_url, json=payload, timeout=10)
+            
+            # Với /cache, Cloudflare sẽ ghi nhận request mà không cần xác thực AI
+            if response.status_code in [200, 201, 202]:
+                print(f"[SUCCESS] ✅ TÍN HIỆU ĐÃ GHI NHẬN VÀO CACHE! Code: {response.status_code}")
+            else:
+                print(f"[LOG] Cloudflare phản hồi: {response.status_code}")
+        except Exception as e:
+            print(f"[ERROR] Mạng bị chặn: {str(e)}")
 
-jobs:
-  autonomous-ocean-pulse:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📥 CHECKOUT REPOSITORY COMPONENT
-        uses: actions/checkout@v4
-
-      - name: 🐍 SETUP PYTHON ENVIRONMENT (SOTA CLEAN)
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          # ĐÃ XÓA BỎ BỘ NHỚ ĐỆM CACHE ĐỂ TRÁNH LỖI KHI REPO KHÔNG CÓ REQUIREMENTS.TXT
-
-      - name: 📦 INSTALL REQUIRED DEPENDENCIES
-        run: |
-          pip install requests
-
-      # KÍCH HOẠT TIẾN TRÌNH TỰ TRỊ — ĐỘC LẬP TUYỆT ĐỐI — CHỐNG XUNG ĐỘT
-      - name: 🛰️ LAUNCH INTERNET CONNECT AUTO SYSTEM
-        run: |
-          if [ -f "Internet-Connect-Auto/Internet-Connect-Auto.py" ]; then
-            python "Internet-Connect-Auto/Internet-Connect-Auto.py"
-          else
-            echo "[ERROR] Không tìm thấy cấu trúc Internet-Connect-Auto Lõi!"
-            exit 1
-          fi
+if __name__ == "__main__":
+    EHCInternetConnectAuto().launch_ocean_pulse()
