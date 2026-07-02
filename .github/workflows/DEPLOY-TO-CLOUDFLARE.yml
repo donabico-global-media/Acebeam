@@ -17,8 +17,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: "acebeam-affiliate"
           directory: "." 
-          # Nạp khóa Zone bổ sung để hệ thống tự động xác thực phân vùng tên miền chiến dịch
-          vars: |
-            CLOUDFLARE_ZONE_ID=${{ secrets.ZONE_ACCOUNT_ID }}
+          # CHÚ Ý: Thay chữ "acebeam-affiliate" bên dưới thành ĐÚNG tên project sếp đặt trên Cloudflare
+          projectName: "acebeam-affiliate" 
