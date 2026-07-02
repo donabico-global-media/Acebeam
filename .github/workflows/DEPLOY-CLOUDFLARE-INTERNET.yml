@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # LUỒNG 1: XUẤT FILE LOG VÀ ĐẨY LÊN GITHUB PAGES TĨNH
+  # LUỒNG 1: ĐẨY LÊN GITHUB PAGES TĨNH & XUẤT FILE TRẠNG THÁI
   deploy-github-pages:
     runs-on: ubuntu-latest
     steps:
@@ -42,23 +42,31 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.' 
-      - id: deployment
+
+      - name: 5. Deploy GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
 
-  # LUỒNG 2: ĐẨY THẲNG LÊN EDGE CDN CLOUDFLARE (TỰ ĐỘNG TẠO PROJECT)
+  # LUỒNG 2: TỰ ĐỘNG TẠO VÀ ĐẨY LÊN EDGE CLOUDFLARE (KHÔNG CẦN TẠO TRƯỚC)
   deploy-cloudflare-pages:
     runs-on: ubuntu-latest
     steps:
       - name: 1. Checkout Code Matrix
         uses: actions/checkout@v4
 
-      - name: 2. Bắn trực tiếp dữ liệu lên Edge Cloudflare
-        uses: cloudflare/pages-action@v1
+      - name: 2. Cài đặt môi trường Node.js bản mới nhất
+        uses: actions/setup-node@v4
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # Tự động lấy tên kho "acebeam" làm tên dự án Pages trên Cloudflare
-          projectName: "${{ github.event.repository.name }}"
-          directory: "."
-          # Sử dụng token nội bộ để cấp quyền tự tạo dự án tự động
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          node-version: 24
+
+      - name: 3. Sử dụng Wrangler CLI để tự động tạo Project và Deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # Tự động lấy tên kho GitHub hiện tại làm tên dự án (Ví dụ: acebeam, 8000kicks...)
+          REPO_NAME="${{ github.event.repository.name }}"
+          echo "Bắt đầu quét hạ tầng Cloudflare cho dự án: $REPO_NAME"
+          
+          # Lệnh tổng lực: Tự động deploy, nếu chưa có project -> TỰ ĐỘNG TẠO MỚI TINH!
+          npx wrangler pages deploy . --project-name="$REPO_NAME" --branch="main"
