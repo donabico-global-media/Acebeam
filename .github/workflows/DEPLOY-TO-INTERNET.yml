@@ -1,0 +1,57 @@
+name: DEPLOY-TO-INTERNET
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write      
+  id-token: write   
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy-infrastructure:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Checkout Source Code Matrix
+        uses: actions/checkout@v4
+
+      - name: 2. Tự động khởi tạo Internet-Bridge.json kiểm tra Log trạng thái
+        run: |
+          echo "Kích hoạt mô-đun sinh Log định tuyến thực địa..."
+          CURRENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          cat <<EOF > Internet-Bridge.json
+          {
+            "status": "Online",
+            "protocol": "INTERNET-EDGE-BRIDGE",
+            "system_activity_indicator": "green",
+            "last_deploy_utc": "$CURRENT_TIME",
+            "repository": "${{ github.repository }}",
+            "commit_shorthand": "${{ github.sha }}"
+          }
+          EOF
+          
+          echo "===== NỘI DUNG FILE LOG SỬA ĐỔI ====="
+          cat Internet-Bridge.json
+          echo "====================================="
+
+      - name: 3. Kích hoạt cấu hình Pages bản địa
+        uses: actions/configure-pages@v5
+
+      - name: 4. Đóng gói lõi hệ thống (Bao gồm cả file JSON)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.' 
+
+      - name: 5. Phát tán dữ liệu ra mạng lưới Internet
+        id: deployment
+        uses: actions/deploy-pages@v4
